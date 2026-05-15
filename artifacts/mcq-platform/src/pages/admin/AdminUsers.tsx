@@ -10,7 +10,8 @@ export default function AdminUsers() {
   const banMut = useBanUser();
   const [search, setSearch] = useState("");
 
-  const users = ((data ?? []) as any[]).filter((u: any) =>
+  const allUsers = (data as any)?.users ?? [];
+  const users = allUsers.filter((u: any) =>
     u.name?.toLowerCase().includes(search.toLowerCase()) ||
     u.email?.toLowerCase().includes(search.toLowerCase())
   );

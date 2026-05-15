@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 export default function WrongAnswers() {
   const { data, isLoading } = useGetWrongAnswers();
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
-  const wrongs: Mcq[] = (data ?? []).filter(m => m.isWrong);
+  const wrongs: Mcq[] = Array.isArray(data) ? data.filter(m => m.isWrong) : [];
 
   const toggle = (id: number) => setExpanded(prev => {
     const n = new Set(prev);
