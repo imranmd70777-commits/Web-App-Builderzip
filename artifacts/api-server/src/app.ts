@@ -25,7 +25,24 @@ app.use(
     },
   }),
 );
-app.use(cors());
+// In production, restrict CORS to the frontend origin.
+// Set ALLOWED_ORIGIN env var on Render (e.g. https://yourdomain.com).
+// Multiple origins can be comma-separated. Falls back to * in development.
+const rawOrigins = process.env["ALLOWED_ORIGIN"];
+const allowedOrigins = rawOrigins
+  ? rawOrigins.split(",").map(o => o.trim()).filter(Boolean)
+  : null;
+
+app.use(cors({
+  origin: allowedOrigins
+    ? (origin, cb) => {
+        // Allow requests with no origin (server-to-server, curl, etc.)
+        if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
+        cb(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    : "*",
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
