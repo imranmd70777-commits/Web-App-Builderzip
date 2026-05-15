@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import {
   LayoutDashboard, BookOpen, Trophy, BarChart2, Bookmark, XCircle,
-  LogOut, User, Shield, ChevronRight, Menu, X, Zap
+  LogOut, User, Shield, ChevronRight, Menu, X, Zap, Upload
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ const adminNav = [
   { href: "/admin/subjects", label: "Subjects", icon: BookOpen },
   { href: "/admin/chapters", label: "Chapters", icon: BookOpen },
   { href: "/admin/mcqs", label: "MCQs", icon: Zap },
+  { href: "/admin/bulk-import", label: "Bulk Import", icon: Upload },
   { href: "/admin/users", label: "Users", icon: User },
   { href: "/admin/reports", label: "Reports", icon: BarChart2 },
 ];

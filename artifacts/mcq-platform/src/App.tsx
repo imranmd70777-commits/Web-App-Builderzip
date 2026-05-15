@@ -32,6 +32,7 @@ import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminSubjects from "@/pages/admin/AdminSubjects";
 import AdminChapters from "@/pages/admin/AdminChapters";
 import AdminMcqs from "@/pages/admin/AdminMcqs";
+import AdminBulkImport from "@/pages/admin/AdminBulkImport";
 import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminReports from "@/pages/admin/AdminReports";
 
@@ -44,55 +45,51 @@ const queryClient = new QueryClient({
   },
 });
 
+const Spinner = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+  </div>
+);
+
 function ProtectedRoute({ component: Component, adminOnly = false }: { component: React.ComponentType; adminOnly?: boolean }) {
   const { user, isLoading, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!isLoading && !user) setLocation("/login");
-    else if (!isLoading && adminOnly && !isAdmin) setLocation("/dashboard");
+    if (!isLoading) {
+      if (!user) setLocation("/login");
+      else if (adminOnly && !isAdmin) setLocation("/dashboard");
+    }
   }, [user, isLoading, isAdmin, adminOnly, setLocation]);
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
-  if (!user || (adminOnly && !isAdmin)) return null;
+  if (isLoading) return <Spinner />;
+  if (!user || (adminOnly && !isAdmin)) return <Spinner />;
   return <Component />;
 }
 
 function PublicRoute({ component: Component }: { component: React.ComponentType }) {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!isLoading && user) setLocation("/dashboard");
-  }, [user, isLoading, setLocation]);
+    if (!isLoading && user) setLocation(isAdmin ? "/admin" : "/dashboard");
+  }, [user, isLoading, isAdmin, setLocation]);
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
-  if (user) return null;
+  if (isLoading) return <Spinner />;
+  if (user) return <Spinner />;
   return <Component />;
 }
 
 function HomeRoute() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAdmin } = useAuth();
   const [, setLocation] = useLocation();
 
   useEffect(() => {
-    if (!isLoading && user) setLocation("/dashboard");
-  }, [user, isLoading, setLocation]);
+    if (!isLoading && user) setLocation(isAdmin ? "/admin" : "/dashboard");
+  }, [user, isLoading, isAdmin, setLocation]);
 
-  if (isLoading) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-    </div>
-  );
-  if (user) return null;
+  if (isLoading) return <Spinner />;
+  if (user) return <Spinner />;
   return <Landing />;
 }
 
@@ -123,6 +120,7 @@ function Router() {
       <Route path="/admin/subjects"><ProtectedRoute component={AdminSubjects} adminOnly /></Route>
       <Route path="/admin/chapters"><ProtectedRoute component={AdminChapters} adminOnly /></Route>
       <Route path="/admin/mcqs"><ProtectedRoute component={AdminMcqs} adminOnly /></Route>
+      <Route path="/admin/bulk-import"><ProtectedRoute component={AdminBulkImport} adminOnly /></Route>
       <Route path="/admin/users"><ProtectedRoute component={AdminUsers} adminOnly /></Route>
       <Route path="/admin/reports"><ProtectedRoute component={AdminReports} adminOnly /></Route>
 

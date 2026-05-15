@@ -11,6 +11,7 @@ import resultsRouter from "./results";
 import statsRouter from "./stats";
 import adminRouter from "./admin";
 import usersRouter from "./users";
+import importRouter from "./import";
 
 const router: IRouter = Router();
 
@@ -18,6 +19,7 @@ router.use(healthRouter);
 router.use(authRouter);
 router.use(subjectsRouter);
 router.use(chaptersRouter);
+router.use(importRouter);
 router.use(mcqsRouter);
 router.use(bookmarksRouter);
 router.use(wrongAnswersRouter);
