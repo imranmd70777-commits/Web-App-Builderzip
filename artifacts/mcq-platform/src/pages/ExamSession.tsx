@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { useGetExam, useSubmitExam } from "@workspace/api-client-react";
@@ -9,11 +9,12 @@ import { cn } from "@/lib/utils";
 function Timer({ minutes, onExpire }: { minutes: number; onExpire: () => void }) {
   const [remaining, setRemaining] = useState(minutes * 60);
 
-  useState(() => {
+  useEffect(() => {
     if (remaining <= 0) { onExpire(); return; }
     const t = setInterval(() => setRemaining(r => { if (r <= 1) { onExpire(); clearInterval(t); return 0; } return r - 1; }), 1000);
     return () => clearInterval(t);
-  });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;

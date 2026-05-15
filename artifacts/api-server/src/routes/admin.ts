@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, usersTable, mcqsTable, subjectsTable, chaptersTable, examSessionsTable, examResultsTable } from "@workspace/db";
-import { eq, ilike, and, sql, desc } from "drizzle-orm";
+import { eq, ilike, and, sql, desc, avg, inArray } from "drizzle-orm";
 import { requireAuth, requireAdmin, type AuthRequest } from "../middlewares/auth";
 
 const router = Router();
@@ -79,14 +79,21 @@ router.get("/admin/reports/subjects", requireAuth, requireAdmin, async (_req, re
   for (const s of subjects) {
     const [mcqCount] = await db.select({ count: sql<number>`count(*)`.mapWith(Number) }).from(mcqsTable).where(eq(mcqsTable.subjectId, s.id));
     const [chapterCount] = await db.select({ count: sql<number>`count(*)`.mapWith(Number) }).from(chaptersTable).where(eq(chaptersTable.subjectId, s.id));
-    const [examCount] = await db.select({ count: sql<number>`count(*)`.mapWith(Number) }).from(examSessionsTable).where(eq(examSessionsTable.subjectId, s.id));
+    const subjectSessionIds = await db.select({ id: examSessionsTable.id }).from(examSessionsTable).where(eq(examSessionsTable.subjectId, s.id));
+    const examCount = subjectSessionIds.length;
+    const sessionIds = subjectSessionIds.map(r => r.id);
+    let avgAccuracy = 0;
+    if (sessionIds.length > 0) {
+      const [acc] = await db.select({ avg: avg(examResultsTable.accuracy) }).from(examResultsTable).where(inArray(examResultsTable.examSessionId, sessionIds));
+      avgAccuracy = acc?.avg != null ? Math.round(Number(acc.avg)) : 0;
+    }
 
     result.push({
       subjectId: s.id,
       subjectName: s.name,
       totalMcqs: mcqCount.count,
-      totalAttempts: examCount.count,
-      avgAccuracy: 75,
+      totalAttempts: examCount,
+      avgAccuracy,
       chapterCount: chapterCount.count,
     });
   }

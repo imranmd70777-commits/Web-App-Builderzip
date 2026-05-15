@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { db, examSessionsTable, examResultsTable, mcqsTable, chaptersTable, wrongAnswersTable } from "@workspace/db";
+import { db, examSessionsTable, examResultsTable, mcqsTable, chaptersTable, wrongAnswersTable, bookmarksTable } from "@workspace/db";
 import { eq, and, inArray } from "drizzle-orm";
 import { requireAuth, type AuthRequest } from "../middlewares/auth";
 
@@ -13,12 +13,18 @@ router.get("/exams", requireAuth, async (req: AuthRequest, res): Promise<void> =
     const mcqs = s.mcqIds.length > 0
       ? await db.select().from(mcqsTable).where(inArray(mcqsTable.id, s.mcqIds))
       : [];
+    const [bookmarks, wrongs] = mcqs.length > 0 ? await Promise.all([
+      db.select({ mcqId: bookmarksTable.mcqId }).from(bookmarksTable).where(and(eq(bookmarksTable.userId, userId), inArray(bookmarksTable.mcqId, mcqs.map(m => m.id)))),
+      db.select({ mcqId: wrongAnswersTable.mcqId }).from(wrongAnswersTable).where(and(eq(wrongAnswersTable.userId, userId), inArray(wrongAnswersTable.mcqId, mcqs.map(m => m.id)))),
+    ]) : [[], []];
+    const bookmarkedIds = new Set(bookmarks.map(b => b.mcqId));
+    const wrongIds = new Set(wrongs.map(w => w.mcqId));
     result.push({
       ...s,
       timeLimitMinutes: s.timeLimitMinutes ?? null,
       completedAt: s.completedAt ? s.completedAt.toISOString() : null,
       startedAt: s.startedAt.toISOString(),
-      mcqs: mcqs.map(m => ({ ...m, isBookmarked: false, isWrong: false })),
+      mcqs: mcqs.map(m => ({ ...m, isBookmarked: bookmarkedIds.has(m.id), isWrong: wrongIds.has(m.id) })),
     });
   }
   res.json(result);
@@ -66,12 +72,19 @@ router.post("/exams", requireAuth, async (req: AuthRequest, res): Promise<void> 
     startedAt: new Date(),
   }).returning();
 
+  const [newBookmarks, newWrongs] = selected.length > 0 ? await Promise.all([
+    db.select({ mcqId: bookmarksTable.mcqId }).from(bookmarksTable).where(and(eq(bookmarksTable.userId, userId), inArray(bookmarksTable.mcqId, selected.map(m => m.id)))),
+    db.select({ mcqId: wrongAnswersTable.mcqId }).from(wrongAnswersTable).where(and(eq(wrongAnswersTable.userId, userId), inArray(wrongAnswersTable.mcqId, selected.map(m => m.id)))),
+  ]) : [[], []];
+  const newBookmarkedIds = new Set(newBookmarks.map(b => b.mcqId));
+  const newWrongIds = new Set(newWrongs.map(w => w.mcqId));
+
   res.status(201).json({
     ...session,
     timeLimitMinutes: session.timeLimitMinutes ?? null,
     completedAt: null,
     startedAt: session.startedAt.toISOString(),
-    mcqs: selected.map(m => ({ ...m, isBookmarked: false, isWrong: false })),
+    mcqs: selected.map(m => ({ ...m, isBookmarked: newBookmarkedIds.has(m.id), isWrong: newWrongIds.has(m.id) })),
   });
 });
 
@@ -85,12 +98,18 @@ router.get("/exams/:id", requireAuth, async (req: AuthRequest, res): Promise<voi
   const mcqs = session.mcqIds.length > 0
     ? await db.select().from(mcqsTable).where(inArray(mcqsTable.id, session.mcqIds))
     : [];
+  const [singleBookmarks, singleWrongs] = mcqs.length > 0 ? await Promise.all([
+    db.select({ mcqId: bookmarksTable.mcqId }).from(bookmarksTable).where(and(eq(bookmarksTable.userId, req.userId!), inArray(bookmarksTable.mcqId, mcqs.map(m => m.id)))),
+    db.select({ mcqId: wrongAnswersTable.mcqId }).from(wrongAnswersTable).where(and(eq(wrongAnswersTable.userId, req.userId!), inArray(wrongAnswersTable.mcqId, mcqs.map(m => m.id)))),
+  ]) : [[], []];
+  const singleBookmarkedIds = new Set(singleBookmarks.map(b => b.mcqId));
+  const singleWrongIds = new Set(singleWrongs.map(w => w.mcqId));
   res.json({
     ...session,
     timeLimitMinutes: session.timeLimitMinutes ?? null,
     completedAt: session.completedAt ? session.completedAt.toISOString() : null,
     startedAt: session.startedAt.toISOString(),
-    mcqs: mcqs.map(m => ({ ...m, isBookmarked: false, isWrong: false })),
+    mcqs: mcqs.map(m => ({ ...m, isBookmarked: singleBookmarkedIds.has(m.id), isWrong: singleWrongIds.has(m.id) })),
   });
 });
 
