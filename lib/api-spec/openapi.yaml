@@ -1,22 +1,43 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: MCQ Learning Platform API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication operations
+  - name: subjects
+    description: Subject operations
+  - name: chapters
+    description: Chapter operations
+  - name: mcqs
+    description: MCQ operations
+  - name: exams
+    description: Exam operations
+  - name: results
+    description: Result operations
+  - name: bookmarks
+    description: Bookmark operations
+  - name: wrong-answers
+    description: Wrong answer operations
+  - name: users
+    description: User management
+  - name: admin
+    description: Admin operations
+  - name: stats
+    description: Statistics and analytics
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +45,828 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # Auth
+  /auth/register:
+    post:
+      operationId: register
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterInput"
+      responses:
+        "201":
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginInput"
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # Subjects
+  /subjects:
+    get:
+      operationId: getSubjects
+      tags: [subjects]
+      summary: List all subjects
+      responses:
+        "200":
+          description: List of subjects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Subject"
+    post:
+      operationId: createSubject
+      tags: [subjects]
+      summary: Create a subject (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubjectInput"
+      responses:
+        "201":
+          description: Subject created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subject"
+
+  /subjects/{id}:
+    get:
+      operationId: getSubject
+      tags: [subjects]
+      summary: Get a subject
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Subject
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subject"
+    patch:
+      operationId: updateSubject
+      tags: [subjects]
+      summary: Update a subject (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubjectUpdate"
+      responses:
+        "200":
+          description: Subject updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Subject"
+    delete:
+      operationId: deleteSubject
+      tags: [subjects]
+      summary: Delete a subject (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # Chapters
+  /subjects/{subjectId}/chapters:
+    get:
+      operationId: getChapters
+      tags: [chapters]
+      summary: List chapters for a subject
+      parameters:
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of chapters
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Chapter"
+    post:
+      operationId: createChapter
+      tags: [chapters]
+      summary: Create a chapter (admin)
+      parameters:
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChapterInput"
+      responses:
+        "201":
+          description: Chapter created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chapter"
+
+  /chapters/{id}:
+    get:
+      operationId: getChapter
+      tags: [chapters]
+      summary: Get a chapter
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Chapter
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chapter"
+    patch:
+      operationId: updateChapter
+      tags: [chapters]
+      summary: Update a chapter (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChapterUpdate"
+      responses:
+        "200":
+          description: Chapter updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Chapter"
+    delete:
+      operationId: deleteChapter
+      tags: [chapters]
+      summary: Delete a chapter (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # MCQs
+  /mcqs:
+    get:
+      operationId: getMcqs
+      tags: [mcqs]
+      summary: List MCQs with optional filters
+      parameters:
+        - name: chapterId
+          in: query
+          schema:
+            type: integer
+        - name: subjectId
+          in: query
+          schema:
+            type: integer
+        - name: filter
+          in: query
+          schema:
+            type: string
+            enum: [all, bookmarked, wrong]
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of MCQs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/McqListResponse"
+    post:
+      operationId: createMcq
+      tags: [mcqs]
+      summary: Create an MCQ (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/McqInput"
+      responses:
+        "201":
+          description: MCQ created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mcq"
+
+  /mcqs/bulk:
+    post:
+      operationId: bulkCreateMcqs
+      tags: [mcqs]
+      summary: Bulk create MCQs (admin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BulkMcqInput"
+      responses:
+        "201":
+          description: MCQs created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BulkMcqResponse"
+
+  /mcqs/{id}:
+    get:
+      operationId: getMcq
+      tags: [mcqs]
+      summary: Get an MCQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: MCQ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mcq"
+    patch:
+      operationId: updateMcq
+      tags: [mcqs]
+      summary: Update an MCQ (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/McqUpdate"
+      responses:
+        "200":
+          description: MCQ updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mcq"
+    delete:
+      operationId: deleteMcq
+      tags: [mcqs]
+      summary: Delete an MCQ (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /mcqs/{id}/submit:
+    post:
+      operationId: submitAnswer
+      tags: [mcqs]
+      summary: Submit an answer for an MCQ
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AnswerInput"
+      responses:
+        "200":
+          description: Answer result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswerResult"
+
+  # Bookmarks
+  /bookmarks:
+    get:
+      operationId: getBookmarks
+      tags: [bookmarks]
+      summary: Get user bookmarks
+      responses:
+        "200":
+          description: List of bookmarked MCQs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mcq"
+
+  /bookmarks/{mcqId}:
+    post:
+      operationId: addBookmark
+      tags: [bookmarks]
+      summary: Bookmark an MCQ
+      parameters:
+        - name: mcqId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Bookmarked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+    delete:
+      operationId: removeBookmark
+      tags: [bookmarks]
+      summary: Remove bookmark
+      parameters:
+        - name: mcqId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Removed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # Wrong answers
+  /wrong-answers:
+    get:
+      operationId: getWrongAnswers
+      tags: [wrong-answers]
+      summary: Get user wrong answers
+      parameters:
+        - name: chapterId
+          in: query
+          schema:
+            type: integer
+        - name: subjectId
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of wrong-answered MCQs
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mcq"
+
+  /wrong-answers/{mcqId}:
+    delete:
+      operationId: clearWrongAnswer
+      tags: [wrong-answers]
+      summary: Clear a wrong answer record
+      parameters:
+        - name: mcqId
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Cleared
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  # Exams
+  /exams:
+    get:
+      operationId: getExams
+      tags: [exams]
+      summary: List exam sessions for current user
+      responses:
+        "200":
+          description: List of exam sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExamSession"
+    post:
+      operationId: startExam
+      tags: [exams]
+      summary: Start a new exam session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamStartInput"
+      responses:
+        "201":
+          description: Exam started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSession"
+
+  /exams/{id}:
+    get:
+      operationId: getExam
+      tags: [exams]
+      summary: Get exam session details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Exam session
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamSession"
+
+  /exams/{id}/submit:
+    post:
+      operationId: submitExam
+      tags: [exams]
+      summary: Submit exam answers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExamSubmitInput"
+      responses:
+        "200":
+          description: Exam result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResult"
+
+  # Results
+  /results:
+    get:
+      operationId: getResults
+      tags: [results]
+      summary: Get user exam results
+      responses:
+        "200":
+          description: List of results
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ExamResult"
+
+  /results/{id}:
+    get:
+      operationId: getResult
+      tags: [results]
+      summary: Get a specific result
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExamResult"
+
+  # Stats
+  /stats/dashboard:
+    get:
+      operationId: getDashboardStats
+      tags: [stats]
+      summary: Get student dashboard statistics
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /stats/leaderboard:
+    get:
+      operationId: getLeaderboard
+      tags: [stats]
+      summary: Get leaderboard
+      responses:
+        "200":
+          description: Leaderboard
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LeaderboardEntry"
+
+  /stats/progress:
+    get:
+      operationId: getProgress
+      tags: [stats]
+      summary: Get user progress per subject/chapter
+      responses:
+        "200":
+          description: Progress data
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProgressEntry"
+
+  # Admin
+  /admin/users:
+    get:
+      operationId: adminGetUsers
+      tags: [admin]
+      summary: List all users (admin)
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: role
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+        - name: offset
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserListResponse"
+
+  /admin/users/{id}:
+    patch:
+      operationId: adminUpdateUser
+      tags: [admin]
+      summary: Update user (admin)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AdminUserUpdate"
+      responses:
+        "200":
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+  /admin/users/{id}/ban:
+    post:
+      operationId: banUser
+      tags: [admin]
+      summary: Ban or unban a user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BanInput"
+      responses:
+        "200":
+          description: Done
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MessageResponse"
+
+  /admin/stats:
+    get:
+      operationId: adminGetStats
+      tags: [admin]
+      summary: Admin overall stats
+      responses:
+        "200":
+          description: Admin statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
+  /admin/reports/subjects:
+    get:
+      operationId: adminGetSubjectReports
+      tags: [admin]
+      summary: Subject-wise MCQ and result reports
+      responses:
+        "200":
+          description: Subject reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/SubjectReport"
+
+  # Users
+  /users/{id}/profile:
+    get:
+      operationId: getUserProfile
+      tags: [users]
+      summary: Get user public profile
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfile"
+
+  /users/me/profile:
+    patch:
+      operationId: updateMyProfile
+      tags: [users]
+      summary: Update own profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +877,627 @@ components:
       required:
         - status
 
+    MessageResponse:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+    # Auth schemas
+    RegisterInput:
+      type: object
+      required: [name, email, password]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        password:
+          type: string
+
+    LoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      required: [user, token]
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        token:
+          type: string
+
+    User:
+      type: object
+      required: [id, name, email, role, isPremium, isBanned, streakDays, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: ["string", "null"]
+        avatar:
+          type: ["string", "null"]
+        role:
+          type: string
+          enum: [student, admin]
+        isPremium:
+          type: boolean
+        isBanned:
+          type: boolean
+        streakDays:
+          type: integer
+        totalPoints:
+          type: integer
+        createdAt:
+          type: string
+
+    UserProfile:
+      type: object
+      required: [id, name, role, streakDays, totalPoints, createdAt]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        avatar:
+          type: ["string", "null"]
+        role:
+          type: string
+        streakDays:
+          type: integer
+        totalPoints:
+          type: integer
+        createdAt:
+          type: string
+
+    ProfileUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        phone:
+          type: string
+        avatar:
+          type: string
+
+    # Subject schemas
+    Subject:
+      type: object
+      required: [id, name, description, icon, color, chapterCount, mcqCount, isActive]
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        chapterCount:
+          type: integer
+        mcqCount:
+          type: integer
+        isActive:
+          type: boolean
+        order:
+          type: integer
+        createdAt:
+          type: string
+
+    SubjectInput:
+      type: object
+      required: [name, description, icon, color]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        order:
+          type: integer
+
+    SubjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        icon:
+          type: string
+        color:
+          type: string
+        isActive:
+          type: boolean
+        order:
+          type: integer
+
+    # Chapter schemas
+    Chapter:
+      type: object
+      required: [id, subjectId, name, description, mcqCount, order, isActive]
+      properties:
+        id:
+          type: integer
+        subjectId:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        mcqCount:
+          type: integer
+        order:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+
+    ChapterInput:
+      type: object
+      required: [name, description]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+
+    ChapterUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        order:
+          type: integer
+        isActive:
+          type: boolean
+
+    # MCQ schemas
+    Mcq:
+      type: object
+      required: [id, chapterId, subjectId, question, options, correctOption, difficulty, isBookmarked, isWrong]
+      properties:
+        id:
+          type: integer
+        chapterId:
+          type: integer
+        subjectId:
+          type: integer
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOption:
+          type: integer
+        explanation:
+          type: ["string", "null"]
+        explanationImage:
+          type: ["string", "null"]
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        isBookmarked:
+          type: boolean
+        isWrong:
+          type: boolean
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+
+    McqInput:
+      type: object
+      required: [chapterId, question, options, correctOption]
+      properties:
+        chapterId:
+          type: integer
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOption:
+          type: integer
+        explanation:
+          type: string
+        explanationImage:
+          type: string
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        tags:
+          type: array
+          items:
+            type: string
+
+    McqUpdate:
+      type: object
+      properties:
+        question:
+          type: string
+        options:
+          type: array
+          items:
+            type: string
+        correctOption:
+          type: integer
+        explanation:
+          type: string
+        explanationImage:
+          type: string
+        difficulty:
+          type: string
+          enum: [easy, medium, hard]
+        tags:
+          type: array
+          items:
+            type: string
+
+    McqListResponse:
+      type: object
+      required: [mcqs, total]
+      properties:
+        mcqs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mcq"
+        total:
+          type: integer
+
+    BulkMcqInput:
+      type: object
+      required: [chapterId, mcqs]
+      properties:
+        chapterId:
+          type: integer
+        mcqs:
+          type: array
+          items:
+            type: object
+            required: [question, options, correctOption]
+            properties:
+              question:
+                type: string
+              options:
+                type: array
+                items:
+                  type: string
+              correctOption:
+                type: integer
+              explanation:
+                type: string
+              difficulty:
+                type: string
+
+    BulkMcqResponse:
+      type: object
+      required: [created, total]
+      properties:
+        created:
+          type: integer
+        total:
+          type: integer
+        mcqs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mcq"
+
+    AnswerInput:
+      type: object
+      required: [selectedOption]
+      properties:
+        selectedOption:
+          type: integer
+        examSessionId:
+          type: ["integer", "null"]
+
+    AnswerResult:
+      type: object
+      required: [isCorrect, correctOption, explanation]
+      properties:
+        isCorrect:
+          type: boolean
+        correctOption:
+          type: integer
+        explanation:
+          type: ["string", "null"]
+        explanationImage:
+          type: ["string", "null"]
+
+    # Exam schemas
+    ExamStartInput:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [practice, timed, full, custom, mixed]
+        subjectId:
+          type: ["integer", "null"]
+        chapterIds:
+          type: array
+          items:
+            type: integer
+        questionCount:
+          type: integer
+        timeLimitMinutes:
+          type: ["integer", "null"]
+
+    ExamSession:
+      type: object
+      required: [id, userId, type, status, mcqs, createdAt]
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        type:
+          type: string
+        status:
+          type: string
+          enum: [active, completed, expired]
+        timeLimitMinutes:
+          type: ["integer", "null"]
+        startedAt:
+          type: string
+        completedAt:
+          type: ["string", "null"]
+        mcqs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Mcq"
+        createdAt:
+          type: string
+
+    ExamSubmitInput:
+      type: object
+      required: [answers]
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            required: [mcqId, selectedOption]
+            properties:
+              mcqId:
+                type: integer
+              selectedOption:
+                type: integer
+
+    ExamResult:
+      type: object
+      required: [id, examSessionId, userId, score, total, accuracy, timeTakenSeconds, chapterBreakdown, createdAt]
+      properties:
+        id:
+          type: integer
+        examSessionId:
+          type: integer
+        userId:
+          type: integer
+        score:
+          type: integer
+        total:
+          type: integer
+        accuracy:
+          type: number
+        timeTakenSeconds:
+          type: integer
+        chapterBreakdown:
+          type: array
+          items:
+            type: object
+            required: [chapterId, chapterName, correct, total]
+            properties:
+              chapterId:
+                type: integer
+              chapterName:
+                type: string
+              correct:
+                type: integer
+              total:
+                type: integer
+        createdAt:
+          type: string
+
+    # Stats schemas
+    DashboardStats:
+      type: object
+      required: [totalMcqsAttempted, totalCorrect, accuracy, streakDays, totalPoints, subjectProgress, recentActivity, weakChapters]
+      properties:
+        totalMcqsAttempted:
+          type: integer
+        totalCorrect:
+          type: integer
+        accuracy:
+          type: number
+        streakDays:
+          type: integer
+        totalPoints:
+          type: integer
+        subjectProgress:
+          type: array
+          items:
+            type: object
+            required: [subjectId, subjectName, attempted, total, accuracy]
+            properties:
+              subjectId:
+                type: integer
+              subjectName:
+                type: string
+              attempted:
+                type: integer
+              total:
+                type: integer
+              accuracy:
+                type: number
+        recentActivity:
+          type: array
+          items:
+            type: object
+            required: [date, mcqsAttempted, correctAnswers]
+            properties:
+              date:
+                type: string
+              mcqsAttempted:
+                type: integer
+              correctAnswers:
+                type: integer
+        weakChapters:
+          type: array
+          items:
+            type: object
+            required: [chapterId, chapterName, subjectName, accuracy]
+            properties:
+              chapterId:
+                type: integer
+              chapterName:
+                type: string
+              subjectName:
+                type: string
+              accuracy:
+                type: number
+
+    LeaderboardEntry:
+      type: object
+      required: [rank, userId, name, totalPoints, accuracy, streakDays]
+      properties:
+        rank:
+          type: integer
+        userId:
+          type: integer
+        name:
+          type: string
+        avatar:
+          type: ["string", "null"]
+        totalPoints:
+          type: integer
+        accuracy:
+          type: number
+        streakDays:
+          type: integer
+
+    ProgressEntry:
+      type: object
+      required: [subjectId, subjectName, chapters]
+      properties:
+        subjectId:
+          type: integer
+        subjectName:
+          type: string
+        chapters:
+          type: array
+          items:
+            type: object
+            required: [chapterId, chapterName, attempted, total, accuracy]
+            properties:
+              chapterId:
+                type: integer
+              chapterName:
+                type: string
+              attempted:
+                type: integer
+              total:
+                type: integer
+              accuracy:
+                type: number
+
+    # Admin schemas
+    UserListResponse:
+      type: object
+      required: [users, total]
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+
+    AdminUserUpdate:
+      type: object
+      properties:
+        role:
+          type: string
+          enum: [student, admin]
+        isPremium:
+          type: boolean
+        isBanned:
+          type: boolean
+
+    BanInput:
+      type: object
+      required: [banned]
+      properties:
+        banned:
+          type: boolean
+
+    AdminStats:
+      type: object
+      required: [totalUsers, totalStudents, totalMcqs, totalSubjects, totalChapters, totalExams, premiumUsers, bannedUsers]
+      properties:
+        totalUsers:
+          type: integer
+        totalStudents:
+          type: integer
+        totalMcqs:
+          type: integer
+        totalSubjects:
+          type: integer
+        totalChapters:
+          type: integer
+        totalExams:
+          type: integer
+        premiumUsers:
+          type: integer
+        bannedUsers:
+          type: integer
+        recentRegistrations:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+
+    SubjectReport:
+      type: object
+      required: [subjectId, subjectName, totalMcqs, totalAttempts, avgAccuracy, chapterCount]
+      properties:
+        subjectId:
+          type: integer
+        subjectName:
+          type: string
+        totalMcqs:
+          type: integer
+        totalAttempts:
+          type: integer
+        avgAccuracy:
+          type: number
+        chapterCount:
+          type: integer

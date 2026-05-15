@@ -1,0 +1,142 @@
+Build a modern full-stack responsive web application for an online MCQ learning and exam platform for students (similar to Tutor.com.bd style but more advanced and attractive UI).
+
+Project requirements:
+
+1. User Features:
+- Students can register/login with email, phone, Google login.
+- Dashboard shows all subjects.
+- Each subject contains multiple chapters.
+- Each chapter contains:
+  a) Practice MCQ
+  b) Timed Quiz
+  c) Full Exam
+  d) Wrong Questions Review
+  e) Bookmarked Questions
+
+2. MCQ Practice System:
+- Students can practice chapter-wise MCQs.
+- Each MCQ must show:
+  - question
+  - 4 options
+  - correct answer after submission
+  - detailed explanation below answer
+  - explanation can include text, image, math formula
+- User can:
+  - bookmark any question
+  - mark wrong answered questions automatically
+  - retry only wrong questions
+  - filter by bookmarked/wrong/all
+  - see instant score
+
+3. Exam System:
+- Subject-wise exam
+- Chapter-wise exam
+- Mixed exam
+- Custom exam (student chooses chapters)
+- Timer based exam
+- Auto submit
+- Result analytics:
+  - total score
+  - accuracy
+  - chapter performance 
+
+4. Admin Panel:
+Super admin dashboard with full control.
+
+Admin can:
+- add/edit/delete subjects
+- add/edit/delete chapters
+- add/edit/delete MCQs
+- manage students
+- manage subscriptions
+- view reports
+- ban/unban users
+- assign premium/free access
+- control homepage banners
+- upload notes/resources
+
+5. Bulk MCQ Upload:
+Admin can upload MCQ in 3 ways:
+- single question manual entry
+- bulk text paste (minimum 50+ at once)
+- PDF upload and auto extract MCQ
+- DOCX upload
+- CSV/Excel upload
+
+AI parser should detect:
+- question
+- options
+- answer
+- explanation
+
+6. Database Structure:
+Use scalable database schema.
+
+Tables:
+- users
+- subjects
+- chapters
+- mcqs
+- explanations
+- exams
+- results
+- bookmarks
+- wrong_answers
+- subscriptions
+- admin_logs
+
+7. UI/UX:
+Design must be:
+- highly attractive
+- modern
+- glassmorphism style
+- dark/light mode
+- animated cards
+- smooth transitions
+- mobile responsive
+- desktop optimized
+- beautiful dashboard
+- student friendly
+
+8. Tech Stack:
+Frontend:
+- Next.js
+- React
+- Tailwind CSS
+- Framer Motion
+
+Backend:
+- Node.js
+- Express.js
+
+Database:
+- PostgreSQL
+
+Admin:
+- role based dashboard
+
+Authentication:
+- JWT + OAuth
+
+Storage:
+- Cloudinary / AWS S3
+
+9. Extra Features:
+- search MCQ
+- progress tracking
+- leaderboard
+- streak system
+- study statistics
+- payment integration (bKash, Nagad, SSLCommerz)
+- notification system
+- WhatsApp support button
+- multilingual (Bangla + English)
+
+10. Generate:
+- complete database schema
+- frontend pages
+- backend APIs
+- admin panel
+- file upload parser
+- deployment instructions
+- clean production-ready code

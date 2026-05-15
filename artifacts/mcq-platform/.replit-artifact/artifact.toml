@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "MCQ Learning Platform"
+version = "1.0.0"
+id = "artifacts/mcq-platform"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25228
+
+[services.development]
+run = "pnpm --filter @workspace/mcq-platform run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/mcq-platform", "run", "build" ]
+publicDir = "artifacts/mcq-platform/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25228"
+BASE_PATH = "/"
