@@ -28,13 +28,18 @@ router.get("/subjects", async (_req, res): Promise<void> => {
 });
 
 router.post("/subjects", requireAuth, requireAdmin, async (req, res): Promise<void> => {
-  const { name, description, icon, color, order } = req.body;
-  if (!name || !description || !icon || !color) {
-    res.status(400).json({ error: "Missing required fields" });
+  const { name, description, icon, color, isActive, order } = req.body;
+  if (!name || typeof name !== "string" || !name.trim()) {
+    res.status(400).json({ error: "Subject name is required" });
     return;
   }
   const [subject] = await db.insert(subjectsTable).values({
-    name, description, icon, color, order: order ?? 0,
+    name: name.trim(),
+    description: description ?? "",
+    icon: icon ?? "BookOpen",
+    color: color ?? "#6366f1",
+    isActive: isActive !== undefined ? isActive : true,
+    order: order ?? 0,
   }).returning();
   res.status(201).json({ ...subject, chapterCount: 0, mcqCount: 0 });
 });

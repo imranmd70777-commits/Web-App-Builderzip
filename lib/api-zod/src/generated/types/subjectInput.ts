@@ -8,8 +8,9 @@
 
 export interface SubjectInput {
   name: string;
-  description: string;
-  icon: string;
-  color: string;
+  description?: string;
+  icon?: string;
+  color?: string;
+  isActive?: boolean;
   order?: number;
 }

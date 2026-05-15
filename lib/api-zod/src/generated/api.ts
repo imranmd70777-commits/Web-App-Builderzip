@@ -102,9 +102,10 @@ export const GetSubjectsResponse = zod.array(GetSubjectsResponseItem)
  */
 export const CreateSubjectBody = zod.object({
   "name": zod.string(),
-  "description": zod.string(),
-  "icon": zod.string(),
-  "color": zod.string(),
+  "description": zod.string().optional(),
+  "icon": zod.string().optional(),
+  "color": zod.string().optional(),
+  "isActive": zod.boolean().optional(),
   "order": zod.number().optional()
 })
 
