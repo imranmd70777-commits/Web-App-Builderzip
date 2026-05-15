@@ -18,8 +18,8 @@ localPort = 25228
 run = "pnpm --filter @workspace/mcq-platform run dev"
 
 [services.production]
-build = [ "pnpm", "--filter", "@workspace/mcq-platform", "run", "build" ]
-publicDir = "artifacts/mcq-platform/dist/public"
+build = [ "pnpm", "--filter", "@workspace/mcq-platform", "run", "build:prod" ]
+publicDir = "artifacts/mcq-platform/dist"
 serve = "static"
 
 [[services.production.rewrites]]
