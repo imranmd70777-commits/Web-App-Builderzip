@@ -3,7 +3,7 @@ import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { setAuthTokenGetter } from "@workspace/api-client-react";
+import { setAuthTokenGetter, setBaseUrl } from "@workspace/api-client-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 
@@ -37,6 +37,11 @@ import AdminUsers from "@/pages/admin/AdminUsers";
 import AdminReports from "@/pages/admin/AdminReports";
 
 setAuthTokenGetter(() => localStorage.getItem("token"));
+
+// In production, point API calls at the configured backend URL.
+// Falls back to relative URLs (same-domain proxy) when not set.
+const apiUrl = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+if (apiUrl) setBaseUrl(apiUrl);
 
 const queryClient = new QueryClient({
   defaultOptions: {

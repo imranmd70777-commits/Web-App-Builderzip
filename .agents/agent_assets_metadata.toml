@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "r6KhLHLD3lkBwcCJLmC1G"
+uri = "file://artifacts/mcq-platform/quizmaster-pro-dist.tar.gz"
+type = "unspecified"
+title = "QuizMaster Pro — Frontend Build (cPanel Upload)"
