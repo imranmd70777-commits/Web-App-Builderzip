@@ -1,21 +1,58 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# QuizMaster Pro — Render deployment (single service: API + React SPA)
+#
+# The Express API server serves the built React frontend as static files.
+# Everything runs under one URL — no CORS configuration needed.
+#
+# HOW TO DEPLOY:
+#   1. Push this repo to GitHub
+#   2. Go to dashboard.render.com → New → Web Service → connect your repo
+#   3. Render auto-detects this render.yaml
+#   4. Add the two "sync: false" env vars manually in the Render dashboard:
+#        DATABASE_URL  — your PostgreSQL connection string
+#        JWT_SECRET    — any long random string (min 32 chars)
+#   5. Click Deploy
+# ─────────────────────────────────────────────────────────────────────────────
+
 services:
   - type: web
-    name: quizmaster-api
+    name: quizmaster-pro
     runtime: node
     region: oregon
     plan: free
     rootDir: .
-    buildCommand: npm install -g pnpm && pnpm install --frozen-lockfile && pnpm run typecheck:libs && pnpm --filter @workspace/api-server run build
+
+    # Install pnpm, install deps, build frontend then API server
+    buildCommand: >-
+      npm install -g pnpm@10 &&
+      pnpm install --no-frozen-lockfile &&
+      NODE_ENV=production pnpm --filter @workspace/mcq-platform run build:prod &&
+      pnpm --filter @workspace/api-server run build
+
+    # Start the Express server (it serves both /api/* and the React SPA)
     startCommand: node artifacts/api-server/dist/index.mjs
+
     healthCheckPath: /api/healthz
+
     envVars:
       - key: NODE_ENV
         value: production
+
       - key: PORT
         value: 10000
+
+      # Set this in the Render dashboard — your PostgreSQL connection string.
+      # You can use Render's free PostgreSQL (New → PostgreSQL) or any external DB.
       - key: DATABASE_URL
-        sync: false          # You paste this in the Render dashboard
+        sync: false
+
+      # Set this in the Render dashboard — any long random string (min 32 chars).
+      # Example: openssl rand -hex 32
       - key: JWT_SECRET
-        generateValue: true  # Render auto-generates a secure random value
-      - key: ALLOWED_ORIGIN
-        sync: false          # You paste your cPanel domain here, e.g. https://yourdomain.com
+        sync: false
+
+# ─── Free PostgreSQL database (optional — delete if using an external DB) ────
+databases:
+  - name: quizmaster-db
+    plan: free
+    region: oregon
