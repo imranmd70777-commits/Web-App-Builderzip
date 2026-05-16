@@ -22,10 +22,11 @@ services:
     plan: free
     rootDir: .
 
-    # Install pnpm, install deps, build frontend then API server
+    # Install pnpm, install deps, push DB schema, build frontend then API server
     buildCommand: >-
       npm install -g pnpm@10 &&
       pnpm install --no-frozen-lockfile &&
+      pnpm --filter @workspace/db run push &&
       NODE_ENV=production pnpm --filter @workspace/mcq-platform run build:prod &&
       pnpm --filter @workspace/api-server run build
 
@@ -50,6 +51,13 @@ services:
       # Example: openssl rand -hex 32
       - key: JWT_SECRET
         sync: false
+
+      # Optional: override the default admin credentials created on first boot.
+      # If not set, defaults are: admin@example.com / Admin123!
+      - key: ADMIN_EMAIL
+        value: admin@example.com
+      - key: ADMIN_PASSWORD
+        value: Admin123!
 
 # ─── Free PostgreSQL database (optional — delete if using an external DB) ────
 databases:

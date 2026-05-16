@@ -1,4 +1,5 @@
 import app from "./app";
+import { seedAdmin } from "./seed";
 import { logger } from "./lib/logger";
 
 const rawPort = process.env["PORT"];
@@ -14,6 +15,9 @@ const port = Number(rawPort);
 if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
+
+// Run admin seed before accepting traffic (idempotent — no-op if admin exists)
+await seedAdmin();
 
 app.listen(port, (err) => {
   if (err) {
