@@ -76,8 +76,10 @@ if (isProd) {
     // Serve all other static files (favicon, robots.txt, etc.)
     app.use(express.static(staticDir, { maxAge: "0" }));
 
-    // SPA fallback — every non-API path returns index.html
-    app.get("*", (_req, res) => {
+    // SPA fallback — every non-API path returns index.html.
+    // Uses a plain middleware (no path arg) so it works in Express 5
+    // which no longer accepts bare wildcard strings like "*".
+    app.use((_req, res) => {
       res.sendFile(path.join(staticDir, "index.html"));
     });
 
